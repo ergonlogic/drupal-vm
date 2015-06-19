@@ -48,6 +48,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       sh.path = "provisioning/JJG-Ansible-Windows/windows.sh"
       sh.args = "provisioning/playbook.yml"
     end
+  elsif vconfig['ansible_in_vm']
+    config.vm.provision "shell",
+      inline: "curl https://raw.githubusercontent.com/GetValkyrie/ansible-bootstrap/master/install-ansible.sh 2>/dev/null | /bin/sh",
+      keep_color: true
+    config.vm.provision "shell",
+      inline: "PYTHONUNBUFFERED=1 ANSIBLE_FORCE_COLOR=true ansible-galaxy install -r /vagrant/provisioning/requirements.txt --force --ignore-errors",
+      keep_color: true
+    config.vm.provision "shell",
+      inline: "PYTHONUNBUFFERED=1 ANSIBLE_FORCE_COLOR=true ansible-playbook /vagrant/provisioning/playbook.yml -i /vagrant/provisioning/inventory --connection=local --sudo",
+      keep_color: true
   else
     # Provisioning configuration for Ansible (for Mac/Linux hosts).
     config.vm.provision "ansible" do |ansible|
